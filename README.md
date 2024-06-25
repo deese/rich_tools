@@ -40,10 +40,20 @@
 
   Helper function to remove tags from text formatted with rich. `"[bold]Bold[/bold]"` becomes `"Bold"`
 
+- **Export a rich table to HTML**
+  
+  Currently there are 2 renderers for the tables using plain HTML or the tabulator js library.
+
 ### Installation
 ```bash
 $ pip install rich-tools
 ```
+
+### Extra configuration
+
+- Set the environment variable DISABLE_PANDAS to 1 if you don't want to load the pandas library. This is useful in environments with low memory like AWS lambda.
+
+
 
 ### Example
 Additional examples can be found in the [examples](examples) dir.

@@ -1,10 +1,18 @@
 from typing import Optional, Iterator, Dict, Any
+import os
 
-import pandas as pd
+if not os.environ.get("DISABLE_PANDAS", False):
+    import pandas as pd
+else:
+    class EmptyPd:
+        """ Empty Class to avoid errors when Pandas is not used."""
+        DataFrame = None
+    pd = EmptyPd()
+
 from rich.table import Table
 
 from rich_tools.text import _strip_tags
-
+from rich_tools.html_tables import exporters
 
 def df_to_table(
     pandas_dataframe: pd.DataFrame,
@@ -22,6 +30,9 @@ def df_to_table(
 
     Returns:
         Table: The rich Table instance passed, populated with the DataFrame values."""
+
+    if not pd:
+        raise ModuleNotFoundError("Pandas is not installed.")
 
     if show_index:
         index_name = str(index_name) if index_name else ""
@@ -89,3 +100,21 @@ def table_to_dicts(
     ]
 
     return (dict(zip(column_keys, row_values)) for row_values in zip(*column_values))
+
+
+def export_table(rich_table: Table, exporter: str, template_file, output_file="output.html", config=None, extra_config=None) -> None:
+    """Export a rich.Table instance to a CSV file.
+
+    Args:
+        rich_table (Table): A rich Table instance to be exported to a CSV file."""
+
+    table_dict = table_to_dicts(rich_table)
+    if not exporter in exporters:
+        raise ValueError(f"Exporter {exporter} not found.")
+
+    if extra_config:
+        exporters[exporter].configure(config=config, extra_config=extra_config)
+
+    exporters[exporter].export(table_dict, template_file, output_file=output_file)
+
+
